@@ -34,7 +34,10 @@
                 
                 <div class="settings-group">
                     <label>
-                        <span>Silence Threshold (dB)</span>
+                        <span>
+                            Silence Threshold
+                            <button id="btn-auto-threshold" class="btn-primary" style="padding: 2px 6px; font-size: 0.7rem; margin-left: 8px;">Auto</button>
+                        </span>
                         <span id="val-threshold" class="val-display">-20 dB</span>
                     </label>
                     <input type="range" id="param-threshold" min="-60" max="-10" step="1" value="-20">
@@ -141,15 +144,19 @@
             </div>
             
             <div class="timeline-track-container" id="timeline-track-container">
-                <!-- Timeline blocks will be dynamically injected here -->
-                <div class="timeline-placeholder">
+                <div class="timeline-placeholder" id="timeline-placeholder">
                     No analysis data yet. Click "Analyze Audio" to view cuts.
+                </div>
+                <div class="timeline-inner-wrapper">
+                    <div id="waveform-container"></div>
+                    <div class="timeline-track" id="tl-track"></div>
                 </div>
             </div>
         </footer>
 
     </div>
 
+    <script src="https://unpkg.com/wavesurfer.js@7"></script>
     <script src="app.js"></script>
 </body>
 </html>

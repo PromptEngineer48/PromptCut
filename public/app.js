@@ -17,6 +17,7 @@ const btnExport = document.getElementById('btn-export');
 const sliderThreshold = document.getElementById('param-threshold');
 const sliderMinSilence = document.getElementById('param-min-silence');
 const sliderPadding = document.getElementById('param-padding');
+const btnAutoThreshold = document.getElementById('btn-auto-threshold');
 
 // Slider Values Labels
 const valThreshold = document.getElementById('val-threshold');
@@ -27,6 +28,7 @@ const valPadding = document.getElementById('val-padding');
 let selectedFile = null;
 let originalDuration = 0;
 let finalOutputUrl = null;
+let wavesurfer = null;
 
 
 // ─── 1. EVENT LISTENERS ───
@@ -46,6 +48,21 @@ uploadBox.addEventListener('change', (e) => {
     // Load local video into original player immediately
     const objectUrl = URL.createObjectURL(file);
     playerOriginal.src = objectUrl;
+
+    // Build the visual waveform synced to the video
+    document.getElementById('timeline-placeholder').classList.add('hidden');
+    if (wavesurfer) wavesurfer.destroy();
+    wavesurfer = WaveSurfer.create({
+        container: '#waveform-container',
+        media: playerOriginal,
+        url: objectUrl,
+        waveColor: '#10b981',
+        progressColor: '#059669',
+        height: 60,
+        barWidth: 2,
+        barGap: 1,
+        barRadius: 2,
+    });
     
     // Get duration once metadata loads
     playerOriginal.onloadedmetadata = () => {
@@ -80,6 +97,42 @@ btnExport.addEventListener('click', () => {
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
+    }
+});
+
+btnAutoThreshold.addEventListener('click', async () => {
+    if (!selectedFile) return;
+    
+    btnAutoThreshold.disabled = true;
+    const oldText = btnAutoThreshold.innerText;
+    btnAutoThreshold.innerText = "Calc...";
+
+    const formData = new FormData();
+    formData.append('file', selectedFile);
+
+    try {
+        const response = await fetch('/suggest-threshold', {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) throw new Error("Server error during suggestion");
+
+        const data = await response.json();
+        const suggested = data.suggested_threshold_db;
+        
+        // Update slider and label
+        sliderThreshold.value = suggested;
+        valThreshold.innerText = `${suggested} dB`;
+        
+        // Auto-run analysis with new threshold
+        runAnalysis();
+    } catch (error) {
+        console.error(error);
+        alert("Error calculating auto threshold.");
+    } finally {
+        btnAutoThreshold.disabled = false;
+        btnAutoThreshold.innerText = oldText;
     }
 });
 
@@ -228,12 +281,10 @@ function updateStats(data) {
 }
 
 function renderTimeline(data) {
-    const trackBox = document.getElementById('timeline-track-container');
     const totalDuration = data.duration;
     
-    // Clear old timeline
-    trackBox.innerHTML = '<div class="timeline-track" id="tl-track"></div>';
     const track = document.getElementById('tl-track');
+    track.innerHTML = ''; // clear old segments
 
     // Speech segments
     data.segments_to_keep.forEach(seg => {

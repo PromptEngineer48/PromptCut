@@ -99,9 +99,9 @@ print(result.summary())
 
 # Custom config
 config = DetectionConfig(
-    silence_threshold_db=-40.0,   # dB — lower = more aggressive
-    min_silence_duration=0.5,     # seconds — only cut silences longer than this
-    padding=0.08,                 # seconds — keep this much silence at cut edges
+    silence_threshold_db=-20.0,   # dB — lower = more aggressive
+    min_silence_duration=0.2,     # seconds — only cut silences longer than this
+    padding=0.02,                 # seconds — keep this much silence at cut edges
 )
 remover = SilenceRemover(config=config)
 result = remover.process("podcast.mp4", "podcast_clean.mp4")
@@ -115,7 +115,10 @@ print(f"Would remove {result.time_saved:.1f}s ({result.percent_removed:.0f}%)")
 
 ```bash
 # Start the server
-uvicorn api.server:app --reload --port 8000
+# uvicorn api.server:app --reload --port 8000
+
+uvicorn server:app --reload --port 8000
+
 ```
 
 **Detect silences (no export):**
@@ -163,3 +166,4 @@ Next features to add (in order of complexity):
 2. **Remove repetition** — transcribe → sentence embeddings → find similar sentences
 3. **Add captions** — use transcript word timestamps → render styled subtitles via FFmpeg
 4. **Find B-roll keywords** — transcribe → NLP keyword extraction → query Pexels API
+

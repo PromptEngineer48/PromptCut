@@ -28,7 +28,7 @@ from pydantic import BaseModel
 import sys
 sys.path.append(str(Path(__file__).parent.parent))
 
-from detector import DetectionConfig
+from detector import DetectionConfig, SilenceDetector
 from pipeline import SilenceRemover, ProcessingResult
 
 default_config = DetectionConfig()
@@ -62,6 +62,10 @@ class DetectResponse(BaseModel):
     percent_removable: float
     segments_to_keep: list
     silence_intervals: list
+
+
+class SuggestResponse(BaseModel):
+    suggested_threshold_db: float
 
 
 class JobStatus(BaseModel):
@@ -123,6 +127,25 @@ async def detect_silences(
                 for s in result.silence_intervals
             ]
         )
+    finally:
+        input_path.unlink(missing_ok=True)
+
+
+@app.post("/suggest-threshold", response_model=SuggestResponse)
+async def suggest_threshold(file: UploadFile = File(...)):
+    """
+    Calculate the 2-sigma recommendation for silence threshold based on the file.
+    """
+    job_id = str(uuid.uuid4())
+    input_path = UPLOAD_DIR / f"{job_id}_{file.filename}"
+
+    with open(input_path, "wb") as f:
+        shutil.copyfileobj(file.file, f)
+
+    try:
+        detector = SilenceDetector()
+        suggestion = detector.suggest_threshold(str(input_path))
+        return SuggestResponse(suggested_threshold_db=round(suggestion, 1))
     finally:
         input_path.unlink(missing_ok=True)
 

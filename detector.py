@@ -60,6 +60,31 @@ class SilenceDetector:
         """Detect silences from a pre-loaded numpy array."""
         return self._find_silences(y, sr)
 
+    def suggest_threshold(self, audio_path: str) -> float:
+        """
+        Calculates a recommended silence threshold based on 3-sigma statistical
+        variance of the audio's volume (dB).
+        """
+        y, sr = librosa.load(audio_path, sr=None, mono=True)
+        return self.suggest_threshold_from_array(y)
+
+    def suggest_threshold_from_array(self, y: np.ndarray) -> float:
+        cfg = self.config
+        rms = librosa.feature.rms(
+            y=y,
+            frame_length=cfg.frame_length,
+            hop_length=cfg.hop_length
+        )[0]
+        rms_db = librosa.amplitude_to_db(rms + 1e-9, ref=np.max)
+        
+        # Peak Offset Method
+        # Find the 95th percentile volume to represent peak speech (ignoring loud pops)
+        peak_speech_db = np.percentile(rms_db, 95)
+        
+        # A good silence threshold is typically ~20 dB below the peak speech volume
+        recommended = peak_speech_db - 20.0
+        return float(np.clip(recommended, -60.0, -10.0))
+
     def _find_silences(self, y: np.ndarray, sr: int) -> List[SilenceInterval]:
         cfg = self.config
 
