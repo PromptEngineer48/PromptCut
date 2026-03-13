@@ -139,10 +139,12 @@ class SilenceRemover:
         # Stage 4: Export
         if on_progress: on_progress(50)
         print("[Stage 4/4] Exporting video...")
-        self.exporter.export_with_select_filter(
+        self.exporter.export_concat(
             input_path=input_path,
             segments=keep_segments,
-            output_path=output_path
+            output_path=output_path,
+            stream_copy=stream_copy,
+            on_progress=on_progress
         )
 
         if on_progress: on_progress(100)
