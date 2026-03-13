@@ -71,6 +71,7 @@ sudo apt install ffmpeg  # or: brew install ffmpeg
 ```bash
 # Basic usage
 python cli.py input.mp4 output.mp4
+python cli.py input.mp4 output.mp4 --min-silence 0.15
 
 # Preview what will be cut (no export)
 python cli.py input.mp4 --preview
@@ -88,8 +89,8 @@ python cli.py video.mp4 out.mp4 --padding 0.1
 ### Python API
 
 ```python
-from core.pipeline import SilenceRemover
-from core.detector import DetectionConfig
+from pipeline import SilenceRemover
+from detector import DetectionConfig
 
 # Default settings
 remover = SilenceRemover()

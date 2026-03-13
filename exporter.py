@@ -9,7 +9,7 @@ import tempfile
 import os
 from pathlib import Path
 from typing import List
-from .edl_builder import Segment
+from edl_builder import Segment
 
 
 class FFmpegExporter:
@@ -22,8 +22,8 @@ class FFmpegExporter:
        - Fast with stream copy (no re-encode)
 
     2. SELECT FILTER — uses select/aselect filters
-       - Frame-accurate but slow (must decode everything)
-       - Use when concat produces glitches
+       - Frame-accurate
+       - Use when concat produces glitches (which is our new primary strategy)
     """
 
     def __init__(self, ffmpeg_path: str = "ffmpeg"):
@@ -82,6 +82,8 @@ class FFmpegExporter:
                 f.write(f"file '{os.path.abspath(input_path)}'\n")
                 f.write(f"inpoint {seg.start:.6f}\n")
                 f.write(f"outpoint {seg.end:.6f}\n")
+            f.flush()
+            os.fsync(f.fileno())
 
         try:
             cmd = [
@@ -120,6 +122,8 @@ class FFmpegExporter:
 
             if process.returncode != 0:
                 print(f"[Exporter] FFmpeg stderr:\n{stderr}")
+                with open(concat_file, "r") as dump_f:
+                    print(f"--- DUMP OF CONCAT FILE ---\n{dump_f.read()}\n---------------------------")
                 raise RuntimeError(f"FFmpeg failed with code {process.returncode}")
 
             output_size = Path(output_path).stat().st_size / (1024 * 1024)
@@ -140,9 +144,9 @@ class FFmpegExporter:
     ) -> str:
         """
         Frame-accurate export using FFmpeg select filter.
-        Slower but more precise than concat for short segments.
+        Ensures video and audio are cut exactly synchronously without relying on keyframes.
         """
-        from .edl_builder import EDLBuilder
+        from edl_builder import EDLBuilder
         edl = EDLBuilder()
         select_expr = edl.to_ffmpeg_select_filter(segments)
 

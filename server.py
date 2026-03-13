@@ -20,15 +20,18 @@ from typing import Optional
 from datetime import datetime
 
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, BackgroundTasks
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 # Add parent to path so core imports work
 import sys
 sys.path.append(str(Path(__file__).parent.parent))
 
-from core.detector import DetectionConfig
-from core.pipeline import SilenceRemover, ProcessingResult
+from detector import DetectionConfig
+from pipeline import SilenceRemover, ProcessingResult
+
+default_config = DetectionConfig()
 
 # ─── Config ────────────────────────────────────────────────────────────────────
 
@@ -42,6 +45,9 @@ app = FastAPI(
     description="Detect and remove silences from video files",
     version="1.0.0"
 )
+
+# Mount the frontend directory
+app.mount("/public", StaticFiles(directory=str(Path(__file__).parent / "public")), name="public")
 
 # In-memory job store (use Redis in production)
 jobs: dict = {}
@@ -72,15 +78,16 @@ class JobStatus(BaseModel):
 
 @app.get("/")
 def root():
-    return {"service": "Silence Remover API", "version": "1.0.0", "status": "ok"}
+    # Redirect root to the frontend app
+    return RedirectResponse(url="/public/index.html")
 
 
 @app.post("/detect", response_model=DetectResponse)
 async def detect_silences(
     file: UploadFile = File(...),
-    threshold_db: float = Form(-35.0),
-    min_silence_duration: float = Form(0.4),
-    padding: float = Form(0.05),
+    threshold_db: float = Form(default_config.silence_threshold_db),
+    min_silence_duration: float = Form(default_config.min_silence_duration),
+    padding: float = Form(default_config.padding),
 ):
     """
     Upload a video/audio file and get back silence intervals + keep segments.
@@ -124,9 +131,9 @@ async def detect_silences(
 async def process_video(
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
-    threshold_db: float = Form(-35.0),
-    min_silence_duration: float = Form(0.4),
-    padding: float = Form(0.05),
+    threshold_db: float = Form(default_config.silence_threshold_db),
+    min_silence_duration: float = Form(default_config.min_silence_duration),
+    padding: float = Form(default_config.padding),
     stream_copy: bool = Form(False),
 ):
     """

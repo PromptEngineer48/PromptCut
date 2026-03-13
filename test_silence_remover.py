@@ -10,9 +10,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from core.detector import SilenceDetector, DetectionConfig, SilenceInterval
-from core.edl_builder import EDLBuilder, Segment
-from core.pipeline import SilenceRemover
+from detector import SilenceDetector, DetectionConfig, SilenceInterval
+from edl_builder import EDLBuilder, Segment
+from pipeline import SilenceRemover
 
 
 # ─── Helpers ───────────────────────────────────────────────────────────────────

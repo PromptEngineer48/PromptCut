@@ -16,8 +16,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-from core.detector import DetectionConfig
-from core.pipeline import SilenceRemover
+from detector import DetectionConfig
+from pipeline import SilenceRemover
 
 
 def main():
@@ -33,20 +33,22 @@ Examples:
         """
     )
 
+    default_config = DetectionConfig()
+
     parser.add_argument("input", help="Input video file")
     parser.add_argument("output", nargs="?", help="Output video file (required unless --preview)")
 
     parser.add_argument(
-        "--threshold", type=float, default=-35.0,
-        help="Silence threshold in dB (default: -35). Lower = more aggressive cutting."
+        "--threshold", type=float, default=default_config.silence_threshold_db,
+        help=f"Silence threshold in dB (default: {default_config.silence_threshold_db}). Lower = more aggressive cutting."
     )
     parser.add_argument(
-        "--min-silence", type=float, default=0.4,
-        help="Minimum silence duration to cut (seconds, default: 0.4)"
+        "--min-silence", type=float, default=default_config.min_silence_duration,
+        help=f"Minimum silence duration to cut (seconds, default: {default_config.min_silence_duration})"
     )
     parser.add_argument(
-        "--padding", type=float, default=0.05,
-        help="Seconds of silence to keep at cut edges for natural feel (default: 0.05)"
+        "--padding", type=float, default=default_config.padding,
+        help=f"Seconds of silence to keep at cut edges (default: {default_config.padding})"
     )
     parser.add_argument(
         "--stream-copy", action="store_true",
@@ -94,7 +96,7 @@ Examples:
     # Show silence intervals
     print(f"\nSilence intervals detected:")
     for i, s in enumerate(result.silence_intervals, 1):
-        print(f"  {i:3d}. {s.start:7.2f}s → {s.end:7.2f}s  ({s.duration:.2f}s, {s.db_level:.1f}dB)")
+        print(f"  {i:3d}. {s.start:7.2f}s -> {s.end:7.2f}s  ({s.duration:.2f}s, {s.db_level:.1f}dB)")
 
 
 if __name__ == "__main__":

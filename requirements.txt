@@ -1,0 +1,17 @@
+# Core audio processing
+librosa>=0.10.0
+numpy>=1.24.0
+soundfile>=0.12.1
+
+# API server
+fastapi>=0.110.0
+uvicorn[standard]>=0.27.0
+python-multipart>=0.0.9
+
+# Testing
+pytest>=7.4.0
+pytest-asyncio>=0.23.0
+
+# Optional: for async job processing at scale
+# celery>=5.3.0
+# redis>=5.0.0

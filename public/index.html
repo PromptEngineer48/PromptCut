@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PromptCut — AI Silence Remover</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- TOP NAVBAR -->
+        <header class="navbar">
+            <div class="logo">
+                <i class="ri-video-cut-fill"></i>
+                <span>PromptCut</span>
+            </div>
+            <div class="nav-actions">
+                <button id="btn-export" class="btn-primary" disabled>
+                    <i class="ri-download-cloud-2-line"></i> Export
+                </button>
+            </div>
+        </header>
+
+        <!-- MAIN EDITOR WORKSPACE -->
+        <main class="workspace">
+            
+            <!-- LEFT PANEL: Settings -->
+            <aside class="sidebar-left">
+                <div class="panel-header">
+                    <h3><i class="ri-settings-4-line"></i> Settings</h3>
+                </div>
+                
+                <div class="settings-group">
+                    <label>
+                        <span>Silence Threshold (dB)</span>
+                        <span id="val-threshold" class="val-display">-20 dB</span>
+                    </label>
+                    <input type="range" id="param-threshold" min="-60" max="-10" step="1" value="-20">
+                    <p class="help-text">Lower = more aggressive cutting.</p>
+                </div>
+
+                <div class="settings-group">
+                    <label>
+                        <span>Min Silence (sec)</span>
+                        <span id="val-min-silence" class="val-display">0.2s</span>
+                    </label>
+                    <input type="range" id="param-min-silence" min="0.1" max="2.0" step="0.1" value="0.2">
+                    <p class="help-text">Ignore pauses shorter than this.</p>
+                </div>
+
+                <div class="settings-group">
+                    <label>
+                        <span>Edge Padding (sec)</span>
+                        <span id="val-padding" class="val-display">0.02s</span>
+                    </label>
+                    <input type="range" id="param-padding" min="0.0" max="0.5" step="0.01" value="0.02">
+                    <p class="help-text">Breathing room at cuts.</p>
+                </div>
+
+                <div class="panel-divider"></div>
+
+                <button id="btn-detect" class="btn-secondary" disabled>
+                    <i class="ri-radar-line"></i> Analyze Audio
+                </button>
+                <button id="btn-process" class="btn-primary" disabled style="margin-top: 10px; width: 100%;">
+                    <i class="ri-magic-line"></i> Remove Silence
+                </button>
+
+            </aside>
+
+            <!-- CENTER PANEL: Video Previewer -->
+            <section class="video-section">
+                
+                <!-- Uploader State -->
+                <div id="upload-overlay" class="upload-overlay">
+                    <label for="video-upload" class="upload-box">
+                        <i class="ri-upload-cloud-2-line"></i>
+                        <h2>Upload a video to start editing</h2>
+                        <p>Supports MP4, MOV, WEBM</p>
+                    </label>
+                    <input type="file" id="video-upload" accept="video/mp4,video/quicktime,video/webm" hidden>
+                </div>
+
+                <!-- Dual Video Viewer -->
+                <div id="video-split-view" class="video-split-view hidden">
+                    <div class="video-container">
+                        <div class="video-badge">Original</div>
+                        <video id="player-original" controls></video>
+                    </div>
+                    <div class="video-container">
+                        <div class="video-badge highlight">Processed</div>
+                        <!-- We use a placeholder until processing is done -->
+                        <div id="player-processed-empty" class="empty-player">
+                            <i class="ri-movie-line"></i>
+                            <p>Process video to preview</p>
+                        </div>
+                        <video id="player-processed" class="hidden" controls autoplay></video>
+                        <div id="loader-processing" class="processing-loader hidden">
+                            <i class="ri-loader-4-line spin"></i>
+                            <span id="loader-text">Cutting silences...</span>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- RIGHT PANEL: Stats -->
+            <aside class="sidebar-right">
+                <div class="panel-header">
+                    <h3><i class="ri-bar-chart-2-line"></i> Stats</h3>
+                </div>
+                
+                <div class="stat-box">
+                    <div class="stat-value" id="stat-original">--:--</div>
+                    <div class="stat-label">Original Duration</div>
+                </div>
+                <div class="stat-box highlight-stat">
+                    <div class="stat-value" id="stat-new">--:--</div>
+                    <div class="stat-label">New Duration</div>
+                </div>
+                <div class="panel-divider"></div>
+                <div class="stat-box">
+                    <div class="stat-value" id="stat-cuts">0</div>
+                    <div class="stat-label">Silences Removed</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="stat-saved">0s (0%)</div>
+                    <div class="stat-label">Time Saved</div>
+                </div>
+            </aside>
+
+        </main>
+
+        <!-- BOTTOM PANEL: Timeline -->
+        <footer class="timeline-container">
+            <div class="timeline-header">
+                <i class="ri-film-line"></i> Timeline
+                <span id="timeline-status" class="timeline-status">Upload a video to process</span>
+            </div>
+            
+            <div class="timeline-track-container" id="timeline-track-container">
+                <!-- Timeline blocks will be dynamically injected here -->
+                <div class="timeline-placeholder">
+                    No analysis data yet. Click "Analyze Audio" to view cuts.
+                </div>
+            </div>
+        </footer>
+
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

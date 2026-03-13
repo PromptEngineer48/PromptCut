@@ -25,12 +25,12 @@ class SilenceInterval:
 
 @dataclass
 class DetectionConfig:
-    silence_threshold_db: float = -35.0   # dB below this = silence
-    min_silence_duration: float = 0.4     # seconds — shorter silences are kept
+    silence_threshold_db: float = -20.0   # dB below this = silence
+    min_silence_duration: float = 0.2     # seconds — shorter silences are kept
     min_keep_duration: float = 0.1        # seconds — don't keep tiny speech fragments
     frame_length: int = 2048              # FFT frame size
     hop_length: int = 512                 # hop between frames (~11ms at 44100Hz)
-    padding: float = 0.05                 # seconds of silence to keep at edges of cuts
+    padding: float = 0.021                 # seconds of silence to keep at edges of cuts
 
 
 class SilenceDetector:

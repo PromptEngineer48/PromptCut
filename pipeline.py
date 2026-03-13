@@ -12,9 +12,9 @@ import librosa
 from dataclasses import dataclass, field
 from typing import List, Optional, Callable
 
-from .detector import SilenceDetector, DetectionConfig, SilenceInterval
-from .edl_builder import EDLBuilder, Segment
-from .exporter import FFmpegExporter
+from detector import SilenceDetector, DetectionConfig, SilenceInterval
+from edl_builder import EDLBuilder, Segment
+from exporter import FFmpegExporter
 
 
 @dataclass
@@ -139,12 +139,10 @@ class SilenceRemover:
         # Stage 4: Export
         if on_progress: on_progress(50)
         print("[Stage 4/4] Exporting video...")
-        self.exporter.export_concat(
+        self.exporter.export_with_select_filter(
             input_path=input_path,
             segments=keep_segments,
-            output_path=output_path,
-            stream_copy=stream_copy,
-            on_progress=lambda p: on_progress(50 + p * 0.5) if on_progress else None
+            output_path=output_path
         )
 
         if on_progress: on_progress(100)

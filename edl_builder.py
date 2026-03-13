@@ -6,7 +6,7 @@ This is the bridge between detection and ffmpeg cutting.
 
 from dataclasses import dataclass
 from typing import List
-from .detector import SilenceInterval, DetectionConfig
+from detector import SilenceInterval, DetectionConfig
 
 
 @dataclass
@@ -88,6 +88,11 @@ class EDLBuilder:
             seg_duration = total_duration - cursor
             if seg_duration >= min_keep:
                 keep_segments.append(Segment(cursor, total_duration, "speech"))
+
+        # Fallback if the entire video was detected as silence
+        if not keep_segments:
+            print("[EDL] Warning: Entire video detected as silence. Keeping full video to prevent FFmpeg crash.")
+            keep_segments.append(Segment(0.0, total_duration, "speech"))
 
         print(f"[EDL] Built {len(keep_segments)} keep segments")
         print(f"[EDL] Original duration: {total_duration:.1f}s")
