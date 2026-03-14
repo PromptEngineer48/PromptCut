@@ -103,6 +103,8 @@ class FFmpegExporter:
                     "-preset", preset,
                     "-c:a", audio_codec,
                     "-b:a", "192k",
+                    "-af", "aresample=async=1",
+                    "-vsync", "1",
                     "-movflags", "+faststart",  # good for web playback
                 ]
 
