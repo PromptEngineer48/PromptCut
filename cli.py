@@ -58,6 +58,10 @@ Examples:
         "--preview", action="store_true",
         help="Detect only, don't export. Shows what would be cut."
     )
+    parser.add_argument(
+        "--enhance-audio", "-ea", action="store_true",
+        help="Apply CapCut-style audio enhancements (compression, EQ, normalization)"
+    )
 
     args = parser.parse_args()
 
@@ -83,6 +87,7 @@ Examples:
     print(f"  Min silence   : {args.min_silence}s")
     print(f"  Padding       : {args.padding}s")
     print(f"  Stream copy   : {args.stream_copy}")
+    print(f"  Enhance audio : {args.enhance_audio}")
 
     if args.preview:
         result = remover.preview(args.input)
@@ -90,7 +95,8 @@ Examples:
         result = remover.process(
             input_path=args.input,
             output_path=args.output,
-            stream_copy=args.stream_copy
+            stream_copy=args.stream_copy,
+            enhance_audio=args.enhance_audio
         )
 
     # Show silence intervals

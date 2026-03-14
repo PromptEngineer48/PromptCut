@@ -48,6 +48,7 @@ class FFmpegExporter:
         segments: List[Segment],
         output_path: str,
         stream_copy: bool = False,
+        enhance_audio: bool = False,
         video_codec: str = "libx264",
         audio_codec: str = "aac",
         crf: int = 18,
@@ -62,6 +63,7 @@ class FFmpegExporter:
             segments: list of Segment objects to keep
             output_path: where to write the result
             stream_copy: if True, copy streams without re-encoding (fastest, may glitch)
+            enhance_audio: if True, apply audio compression, Eq, and normalization
             video_codec: codec for re-encode (libx264, libx265, etc.)
             audio_codec: audio codec (aac, mp3, copy)
             crf: quality 0-51, lower = better (18 is near-lossless)
@@ -97,13 +99,21 @@ class FFmpegExporter:
             if stream_copy:
                 cmd += ["-c", "copy"]
             else:
+                audio_filters = ["aresample=async=1"]
+                if enhance_audio:
+                    # Highpass at 80Hz, compress dynamics to make vocals thicker, boost treble slightly for clarity, broadcast normalize
+                    audio_filters.append("highpass=f=80")
+                    audio_filters.append("acompressor=ratio=4")
+                    audio_filters.append("treble=g=5")
+                    audio_filters.append("loudnorm=I=-16:TP=-1.5:LRA=11")
+                
                 cmd += [
                     "-c:v", video_codec,
                     "-crf", str(crf),
                     "-preset", preset,
                     "-c:a", audio_codec,
                     "-b:a", "192k",
-                    "-af", "aresample=async=1",
+                    "-af", ",".join(audio_filters),
                     "-vsync", "1",
                     "-movflags", "+faststart",  # good for web playback
                 ]

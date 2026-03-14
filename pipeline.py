@@ -89,6 +89,7 @@ class SilenceRemover:
         input_path: str,
         output_path: str,
         stream_copy: bool = False,
+        enhance_audio: bool = False,
         on_progress: Optional[Callable[[float], None]] = None,
         dry_run: bool = False
     ) -> ProcessingResult:
@@ -99,6 +100,7 @@ class SilenceRemover:
             input_path: path to input video (.mp4, .mov, .mkv, etc.)
             output_path: where to save the result
             stream_copy: skip re-encoding (faster, but may glitch at cut points)
+            enhance_audio: apply audio enhancements (compression, EQ)
             on_progress: optional callback(percent: float) for UI progress bars
             dry_run: if True, detect only — don't export video
         """
@@ -144,6 +146,7 @@ class SilenceRemover:
             segments=keep_segments,
             output_path=output_path,
             stream_copy=stream_copy,
+            enhance_audio=enhance_audio,
             on_progress=on_progress
         )
 
