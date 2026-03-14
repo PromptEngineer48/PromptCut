@@ -17,6 +17,7 @@ const btnExport = document.getElementById('btn-export');
 const sliderThreshold = document.getElementById('param-threshold');
 const sliderMinSilence = document.getElementById('param-min-silence');
 const sliderPadding = document.getElementById('param-padding');
+const toggleEnhanceAudio = document.getElementById('param-enhance-audio');
 const btnAutoThreshold = document.getElementById('btn-auto-threshold');
 
 // Slider Values Labels
@@ -191,6 +192,7 @@ async function runProcessing() {
     formData.append('threshold_db', sliderThreshold.value);
     formData.append('min_silence_duration', sliderMinSilence.value);
     formData.append('padding', sliderPadding.value);
+    formData.append('enhance_audio', toggleEnhanceAudio.checked);
 
     try {
         // 1. Submit Job

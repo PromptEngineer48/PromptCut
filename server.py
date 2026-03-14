@@ -158,6 +158,7 @@ async def process_video(
     min_silence_duration: float = Form(default_config.min_silence_duration),
     padding: float = Form(default_config.padding),
     stream_copy: bool = Form(False),
+    enhance_audio: bool = Form(False),
 ):
     """
     Upload a video, process in background, poll /jobs/{job_id} for status.
@@ -190,7 +191,8 @@ async def process_video(
             min_silence_duration=min_silence_duration,
             padding=padding
         ),
-        stream_copy=stream_copy
+        stream_copy=stream_copy,
+        enhance_audio=enhance_audio
     )
 
     return JobStatus(

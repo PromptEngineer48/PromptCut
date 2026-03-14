@@ -64,6 +64,26 @@
 
                 <div class="panel-divider"></div>
 
+                <div class="settings-group toggle-group" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <label for="param-enhance-audio" style="margin-bottom: 0; display: flex; align-items: center; gap: 8px;">
+                        <i class="ri-speaker-3-line"></i>
+                        <span>Premium Audio</span>
+                    </label>
+                    <label class="switch" style="position: relative; display: inline-block; width: 40px; height: 24px;">
+                        <input type="checkbox" id="param-enhance-audio" style="opacity: 0; width: 0; height: 0;">
+                        <span class="slider round" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #374151; transition: .4s; border-radius: 24px;"></span>
+                    </label>
+                </div>
+                <style>
+                    /* Inline styles for toggle switch to avoid altering style.css directly */
+                    .switch input:checked + .slider { background-color: #10b981; }
+                    .switch input:focus + .slider { box-shadow: 0 0 1px #10b981; }
+                    .switch .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+                    .switch input:checked + .slider:before { transform: translateX(16px); }
+                </style>
+
+                <div class="panel-divider"></div>
+
                 <button id="btn-detect" class="btn-secondary" disabled>
                     <i class="ri-radar-line"></i> Analyze Audio
                 </button>
